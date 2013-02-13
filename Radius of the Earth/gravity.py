@@ -17,15 +17,16 @@ BURTON_G = 9.804253  # in meters per second square
 #Data
 time = data_ascending[3:, 0]
 floor = data_ascending[3:, 1]  # Floor number
-#g = abs(data_ascending[:, 2] - 576.5) * MG_CONSTANT / 100.  
+#g = abs(data_ascending[:, 2] - 576.5) * MG_CONSTANT / 100.
 print floor
 
 g = data_ascending[3:, 2]
-g = abs((-0.18 * time + g) - 566.96) * MG_CONSTANT / 100.
+print g
+g = abs((0.18 * time) + g) * MG_CONSTANT / 100.
 print g
 
 
-#rel_floor = data_ascending[:, 0] - 8  # Floor relative to floor 8, negative 
+#rel_floor = data_ascending[:, 0] - 8  # Floor relative to floor 8, negative
 #rel_g = g[:] - g[8]  # Delta g with respect to floor 8.o
 y = g / BURTON_G
 basement_distance = floor * FLOOR_HEIGHT
@@ -39,26 +40,28 @@ print basement_distance
 #print del_g
 
 p = zeros(2)
-p[0] = -6.
+p[0] = 6.
+p[1] = 1.
+
 
 def peval(basement_distance, p):
-    return -2. / p[0] * basement_distance 
+    return -2. / p[0] * basement_distance + p[1]
 
 
 def residuals(p, y, basement_distance):
     return y - peval(basement_distance, p)
 
 
-p_final, cov_x, info, mesg, success = leastsq(residuals, p,
-args=(y, basement_distance), full_output=True)
-
+p_final, cov_x, info, mesg, success = leastsq(residuals,
+                                              p, args=(y, basement_distance),
+                                              full_output=True)
 
 
 title("Ascending Floors")
 plot(basement_distance, y, linestyle='None', marker='o')
 plot(basement_distance, peval(basement_distance, p_final))
-xlabel("Floor")
-ylabel("g")
+xlabel("Floor Height from Basement")
+ylabel("del g / BURTON G")
 show()
 
 #title("Distance from Reference Station")
